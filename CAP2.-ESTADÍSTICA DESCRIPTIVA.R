@@ -1,4 +1,4 @@
-      "2.1 ESTADÍSTICA DESCRIPTICA CON R"
+       "2.1 ESTADÍSTICA DESCRIPTICA CON R"
     "2.1.1 MEDIDAS DE POSICIÓN Y DISPERSIÓN"
 
 "para creaar valores aleatorios normalizados"
