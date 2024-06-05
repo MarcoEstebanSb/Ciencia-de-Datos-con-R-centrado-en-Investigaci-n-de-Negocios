@@ -1,0 +1,93 @@
+"Estudia el grado o fuerza en la relación de variables aleatorias"
+
+"  Hipótesis
+H0: Py,1...k = 0
+H1: Py,1...k ≠ 0"
+
+
+#         10.2 CORRELACIÓN MULTIPLE
+
+"Se quiere analizar si existe relación lineal entre la venta de autos en unidades y el gasto en publicidad en
+periodico y radio en euros durante los ultimos 9 meses"
+
+Autos<-c(69,51,53,46,67,82,19,66,66)
+
+Periódico<-c(386,256,290,203,447,329,112,578,620)
+
+Radio<-c(2412,10691,11680,12558,2462,2605,16203,2003,1823)
+
+
+ventapublic<-data.frame(Autos,Periódico,Radio)
+View(ventapublic)
+
+"Se usa cor para la df. En el parámetro use se indica all.obs porque no hay valores perdidos.
+Si los hubiese entonces se indica complete.obs que los elimina o se puede usar
+pairwise.complete.obs que suprime los valores perdidos por parejas
+En method se usa Pearson pero igual se puede usan kendall o spearman"
+
+
+cor(ventapublic, use = "all.obs", method = "pearson")
+
+"En caso de correlaciones múltiples es la comparació con el análisis de covarianza con cov"
+
+
+
+cov(ventapublic,use = "all.obs")
+
+"Lo malo de cor y cov es que no dan los niveles de significancia. Para obtenerlos se usa library(Hmisc)
+los datos se deben de dar en forma de matriz y el parametro puede ser pearson o spearman
+Así se obtienen las correlaciones múltiples y los niveles de significancia sobre los 9 elementos"
+
+library(Hmisc)
+
+rcorr(as.matrix(ventapublic),type = "pearson")
+
+"Existe una correlación positiva aunque no tan significativa (como lo mostraba nuestro modelo) entre autos 
+y periodico, osea que, a más gastos en publicidad en periodico mayor venta de autos
+Existe una correlación negativa pero significativa (como lo mostraba el modelo) entre autos y radio, 
+osea que a menos gastos en publicidad en radio mayor venta de autos"
+
+
+
+
+"si deseamos un intervalo de confianza usa correlaciones simples una vez calculada la multiple"
+
+cor.test(autos, periodico)
+
+cor.test(autos,radio)
+
+
+library(extrafont)
+# Para representar en gráficos a la correlación múltiple
+install.packages("corrgram")
+library(corrgram)
+
+corrgram(ventapublic,order = TRUE, lower.panel = panel.shade,upper.panel = panel.pie, text.panel = panel.txt,
+         main="Correlaciones", family = "Times New Roman")
+
+corrgram(ventapublic,order = TRUE, lower.panel = panel.ellipse,upper.panel = panel.pts, 
+         text.panel = panel.txt, diag.panel = panel.minmax, main="Correlaciones", family = "Times New Roman")
+
+#para representar los paneles por encima o por debajo de la diagonal solo se usa null
+corrgram(ventapublic,order = TRUE, lower.panel = panel.ellipse,upper.panel = NULL, 
+         text.panel = panel.txt, main="Correlaciones")
+
+
+
+#más graficos
+
+pairs(ventapublic, family = "Times New Roman", font.labels = 6,pch=19)
+
+library(psych)
+
+pairs.panels(ventapublic,smooth = TRUE, scale = FALSE, density = TRUE,ellipses = TRUE,method = "pearson",
+             pch = 19,lm=FALSE,cor = TRUE,jiggle = FALSE,factor = 2,hist.col = "#CD3278",stars = TRUE,
+             ci = TRUE, family = "Times New Roman",font.labels = 6)
+
+corPlot(ventapublic,cex = 3)
+
+library(corrplot)
+col3<- c("#4876FF", "#CD3278","#2FFFA4")
+
+corrplot.mixed(cor(ventapublic),lower="number",upper = "circle", tl.col="black")
+
