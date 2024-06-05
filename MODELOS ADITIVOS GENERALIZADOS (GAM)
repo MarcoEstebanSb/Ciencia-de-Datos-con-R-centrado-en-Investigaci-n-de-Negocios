@@ -1,0 +1,69 @@
+"Los GAM permiten la validación de las variables significativas de los árboles de regresión. Son una extensión
+de los modelos de RL múltiple. Estos modelos no suponen que la variable Y dependiente no tiene distrib normal, por
+lo que serán muy adecuados en caso de que no siga distribución normal
+Muy utilizado en ciencias experimentales como biologicas, medicina, ambientales, etc donde nuestra variable Y no 
+siga dist norm.
+También son un gran complemento de los árboles de regresión para validación de las variables que se tienen como
+importantes en el árbol
+
+Usaremos los datos del cap14 desde el árbol creado, consta de 14 variables con ganancias semanales en euros
+durante dos años. El objetivo es el mismo, estudiar en que variables y en que cantidad se relacionan con la
+inverión en la variable dependiente tecnica"
+
+    ganancias<-read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP14.- ÁRBOLES DE REGRESIÓN\\gananciasaccionesbolsa.csv")
+
+
+    attach(ganancias)
+    View(ganancias)
+
+    library(rpart)
+
+    #Se procede a construir el árbol. En method="anova"
+
+    arbol<-rpart(tecnicas~acciona+acerinox+bankia+enagas+ferrovial+gamesa+iberdrola+indra+mediaset+merlin+ohl+red,
+             data = ganancias,method = "anova")
+    arbol
+plot(arbol,margin = 0.1)
+text(arbol)
+
+
+#Nos indica el árbol que nuestras variables significativas son gamesa, mediaset y ohl
+
+#Para calcular el modelo GAM:
+    #convertimos a data.frame
+dfganancias<-data.frame(ganancias)
+View(dfganancias)
+
+
+library(mgcv)
+
+
+resultados <- gam(tecnicas~s(gamesa,bs="ts")+s(mediaset,bs="ts")+s(ohl,bs="ts"),
+                  data = dfganancias,family = "poisson")
+resultados
+
+# Con summary se extrae la información:
+
+summary(resultados)
+
+# los P-Values confirman que nuestras 3 covariables son significativas y explican a tecnicas (Y)
+
+"Se pueden plotear los residuos de las 3 covariables "
+par(mfrow=c(3,1))
+
+#Se realizan los plots de cada covariable con select
+plot(resultados, select = 1, scale = 0, residuals = T, shade = T, pch = 10, xlab = "gamesa")
+
+plot(resultados, select = 2, scale = 0, residuals = T, shade = T, pch = 10, xlab = "mediaset")
+
+plot(resultados, select = 3, scale = 0, residuals = T, shade = T, pch = 10, xlab = "ohl")
+
+"Los residuos se ajustan bien a la banda de confianza delimitada por la sombra (únicamente un residuo queda fuera
+de la banda de confianza en las 3 variables, puede ser un dato anómalos por lo que se puede complementar esta 
+investigación con un modelo de regresión multiple robusta). Podemos afirmar que las tres variables son 
+significativas
+
+
+EN CASO DE QUE NO SE AJUSTARA BIEN UNA VARIABLES Y LOS RESIDUOS QUEDARAN FUERA DE LA BANDA DE CONFIANZA EN SOMBRA, 
+ESTA COVARIABLE QUEDARÍA FUERA DEL MODELO Y SE ELIMINARÍA DEL MODELO GAM, CALCULANDO UN SEGUNDO MODELO SIN ELLA"
+
