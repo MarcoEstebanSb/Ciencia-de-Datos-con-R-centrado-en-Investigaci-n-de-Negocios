@@ -1,0 +1,383 @@
+" Permite la comparación de medias de r grupo
+el modelo presupone que las varianzas son iguales y que los residuos o errores son
+aleatorios, independientes e identicamente distribuidos con media 0 y desviación
+estándar constante (homocedasticidad)
+
+Se deben de cumplir tres supuestos:
+1. Normalidad
+2. Homocedasticidad
+3. Independencia de las muestras"
+
+
+#            5.1 ANÁLISIS DE VARIANZA ANOVA
+#       5.1.1 FORMULACIÓN DE ANOVA. UN FACTOR. COMPLETAMENTE ALEATORIZADO
+
+"Permite la comparación de las medias de los r grupos(r>=2), el modelo presupone 
+que las varianzas son iguales y que los residuos o errores son aleatorios
+independientes e identicamente distribuidos con media 0 y desviación estándar 
+constante (homocedasticidad)
+niveles = tratamientos
+
+PROCEDIMIENTO A SEGUIR SEGÚN LA HIPÓTESIS ACEPTADA
+
+HIPOTESIS
+H0: M1 = M2 = M3 ... = Mr
+H1: No todas las medias son iguales, osea, al menos una de las medias es diferente
+
+sí H0 se acepta el estadístico F seguirá una distribución F de Snedecor con (r-1,n-r) grados de libertad
+
+Cuando H0 se rechaza se lleva a cabo comparaciones multiples de tales tratamientos. LA IDEA ES FORMAR
+GRUPOS DE TRATAMIENTOS EQUIVALENTES para eso se utiliza el CONTRASTE HSD DE TUKEY
+HSD & LSD no son completamente validos en un diseño por bloques aleatorizados pero muchos recomiendan
+hacerlo"
+
+
+#       5.1.2 FORMULACIÓN DE ANOVA. DOS FACTORES. COMPLETAMENTE ALEATORIZADO
+
+"hay presencia de dos factores A Y B que actuan a niveles a y b respectivamente"
+"HIPÓTESIS
+
+H0: M1 = M2 = ... Ma  <- Igualdad de los efectos medios de los a niveles del factor A
+H0.i: M1 = M2 = ... Mb  <- Igualdad de los efectos medios de los b niveles del factor B
+H0.II <- No existe interacción entre ambos factores"
+
+
+
+#       5.2 ANÁLISIS DE VARIANZA DE UN FACTOR. DISEÑO COMPLERAMENTE ALEATORIZADO. COMPARACIONES MÚLTIPLES
+"Los datos de la siguiente tabla corresponden a 5 carteras de inversión, durante los ultimos 5 meses
+queremos saber en cual nos conviene invertir por sus ganancias y nuestro cliente ya invierte en la segunda
+cartera"
+
+instrumentos<-c(53,52,54,53,51,65,66,69,64,68,30,33,34,33,31,51,53,52,54,56,33,34,35,30,32)
+length(instrumentos)
+#la variable carteras será nuestro factor
+carteras <- factor(rep(LETTERS[1:5],c(5,5,5,5,5)))
+
+# se crea un data frame
+carins<-data.frame(carteras,instrumentos)
+carins
+
+#Se calcula el anova
+summary(aov(instrumentos~carteras,carins))
+
+#   si P-value > 0.05 se acepta la hipótesis nula H0
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa H1
+
+
+# 2e-16 ***<0.05 se acepta h1 no hay igualdad de las medias de los tratamientos
+#                              al menos una es diferente
+
+
+
+
+#... Cuando H0 se rechaza se lleva a cabo comparaciones multiples de tales tratamientos. LA IDEA ES FORMAR
+#GRUPOS DE TRATAMIENTOS EQUIVALENTES para eso se utiliza el CONTRASTE HSD DE TUKEY
+#HSD & LSD no son completamente validos en un diseño por bloques aleatorizados pero muchos recomiendan
+#hacerlo
+
+
+resultado<- aov(instrumentos~carteras)
+tukey<-TukeyHSD(resultado)
+plot(tukey, col = "blue")
+
+tukey
+"El rango de lwr y upr que contengan al cero implican la igualdad de los efectos medios
+
+#D-A   0.6  -2.753596   3.953596 0.9825062
+#E-C   0.6  -2.753596   3.953596 0.9825062
+
+
+la lógica es la siguiente:
+Nuestro cliente ya invierte en B por lo que como no hay ninguna cartera de inversión relacionada con B
+que contenga dentro de su rango al 0 NO SE DEBE INVERTIR EN NINGUNA CARTERA MÁS, o en su caso, INVERTIR EN
+(D,A) O (E,C)"
+
+
+plot(tukey, col = "blue")
+
+"en el plot podemos observar como nuestras elecciones se encuentran sobre la linea de confianza.
+Como no se agrupan más con la cartera B que escogió el cliente, entonces no se debería de invertir en
+ninguna más o en dado caso en el grupo A Y D"
+
+
+#   A CONTINUACIÓN SE VAN A PROBAR LOS SUPUESTOS DE NORMALIDAD Y HOMOCEDASTICIDAD
+
+par(mfrow=c(1,5))
+
+qqnorm(instrumentos[1:5],pch = 14)
+qqnorm(instrumentos[6:10],pch = 14)
+qqnorm(instrumentos[11:15],pch = 14)
+qqnorm(instrumentos[16:20],pch = 14)
+qqnorm(instrumentos[21:25],pch = 14)
+
+#No existe normalidad en los datos de las carteras 1 y 3 porque no siguen la diagonal
+
+#usando el diagrama de hojas y ramas
+
+stem(instrumentos[1:5])
+
+# Se debería de calcular para cada cartera pero como solo hay 5 datos por cartera no nos dará mucha info
+
+# El análisis de HOMOCEDASTICIDAD se realiza con el BOXPLOT
+
+par(mfrow=c(1,1))
+
+boxplot(instrumentos~carteras)
+#Podemos observar que las cajas no son iguales, son diferentes la 1 y la 3 y no se puede admitir una varianza común
+
+
+#USANDO LOS DATOS DESDE UN CSV:
+
+file.choose()
+
+gananciascarteras <- read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP5.- ANÁLISIS DE VARIANZA. UNO Y DOS FACTORES. DISEÑO COMPLETAMENTE ALEATORIZADO\\Anova un factor carteras ganancias.csv")
+gananciascarteras
+View(gananciascarteras)
+ganancias <- c(gananciascarteras$ene,gananciascarteras$feb,gananciascarteras$mar,gananciascarteras$abr,
+               gananciascarteras$may)
+cartsinversion <- factor(gananciascarteras$Carteras)
+
+df_gancart <- data.frame(cartsinversion,ganancias)
+df_gancart
+View(df_gancart)
+
+#para haccer el anova
+summary(aov(ganancias~cartsinversion,df_gancart))
+
+#Se acepta h1 como habiamos visto y se hace lo correspondiente ...
+"... Cuando H0 se rechaza se lleva a cabo comparaciones multiples de tales tratamientos. LA IDEA ES FORMAR
+GRUPOS DE TRATAMIENTOS EQUIVALENTES para eso se utiliza el CONTRASTE HSD DE TUKEY
+HSD & LSD no son completamente validos en un diseño por bloques aleatorizados pero muchos recomiendan
+hacerlo"
+
+resultadocondf<- aov(ganancias~cartsinversion, df_gancart)
+tukey2<-TukeyHSD(resultadocondf)
+plot(tukey2, col = "red")
+tukey2
+
+"El rango de lwr y upr que contengan al cero implican la igualdad de los efectos medios
+
+#4-1   0.6  -2.753596   3.953596 0.9825062
+#5-3   0.6  -2.753596   3.953596 0.9825062
+
+
+la lógica es la siguiente:
+Nuestro cliente ya invierte en 2 por lo que como no hay ninguna cartera de inversión relacionada con 2
+que contenga dentro de su rango al 0 NO SE DEBE INVERTIR EN NINGUNA CARTERA MÁS, o en su caso, INVERTIR EN
+(4,1) O (5,3)"
+
+
+#   A CONTINUACIÓN SE VAN A PROBAR LOS SUPUESTOS DE NORMALIDAD Y HOMOCEDASTICIDAD
+#Se tiene que reordenar la data frame para que funcione este comando
+
+library(tidyverse)
+library(datasets)
+
+df_ordenado <- df_gancart[order(df_gancart$cartsinversion), ]
+df_ordenado
+
+
+qqnorm(df_ordenado$ganancias[1:5],pch = 14)
+qqnorm(df_ordenado$ganancias[6:10],pch = 14)
+qqnorm(df_ordenado$ganancias[11:15],pch = 14)
+qqnorm(df_ordenado$ganancias[16:20],pch = 14)
+qqnorm(df_ordenado$ganancias[21:25],pch = 14)
+
+
+# SIEMPRE REORDENA TU DATA FRAME EN FUNCIÓN A TUS FACTORES
+
+#No existe normalidad en los datos de las carteras 1 y 3 porque no siguen la diagonal
+
+#usando el diagrama de hojas y ramas
+
+stem(df_ordenado$ganancias[1:5])
+
+# Se debería de calcular para cada cartera pero como solo hay 5 datos por cartera no nos dará mucha info
+
+# El análisis de HOMOCEDASTICIDAD se realiza con el BOXPLOT
+
+par(mfrow=c(1,1))
+
+boxplot(df_ordenado$ganancias~df_ordenado$cartsinversion)
+#Podemos observar que las cajas no son iguales, son diferentes la 1 y la 3 y no se puede admitir una varianza común
+
+
+# con el test de BARLETT se puede analizar la HOMOCEDASTICIDAD
+"H0: Existe homogeneidad de varianzas
+ H1: No existe homogeneidad de varianzas"
+
+#   si P-value > 0.05 se acepta la hipótesis nula
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+
+bartlett.test(df_ordenado$ganancias~df_ordenado$cartsinversion)
+
+
+#p-value = 0.8409 > 0.05 Se acepta H0 peeero por lo analizado anteriormente existen dudas sospechosas
+#por lo que se realiza un ONEWAY.TEST
+
+#Sí se obtiene un p-value alto cercano a 1 se podrá aceptar la igualdad de varianzas
+
+"H0: Las varianzas son iguales
+ H1: Las varianzas no son iguales"
+#   si P-value > 0.05 se acepta la hipótesis nula
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+oneway.test(df_ordenado$ganancias~df_ordenado$cartsinversion)
+#p-value = 5.491e-10 < 0.05 Se acepta H1
+
+
+#Como nuestros supuestos parece ser que no se cumplen o son muy confusos 
+#se puede optar por pruebas no paramétricas (CAP3)
+
+
+"A PARTIR DE AHORA TODO LO HAREMOS IMPORTADO DESDE UN CSV PORQUE NO VOY A ESTAR DEFINIENDO VARIABLES
+AQUÍ EN R QUE NO ES ASÍ EN LA VIDA REAL"
+
+
+
+
+#       5.3 ANÁLISIS DE VARIANZA DE DOS FACTORES. DISEÑO COMPLERAMENTE ALEATORIZADO. COMPARACIONES MÚLTIPLES
+
+
+
+"Tenemos 3 carteras de inversión usadas en los últimos 5 años. Se desea comprobar cuál ha sido el año
+más conveniente para las carteras y compararlo con las previsiones que en su día se obtuvieron con otras
+técnicas como regresiones y series temporales. 
+Se tienen dos factores: las cartareas y los años"
+
+
+
+"HIPÓTESIS
+
+
+  H0: Los 5 años son homogeneos
+  H1: No todos son homogeneos
+
+si P-value > 0.05 se acepta la hipótesis nula
+Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+
+  H01: Las 3 carteras son homogeneas
+  H11: No todas son homogeneas
+
+si P-value > 0.05 se acepta la hipótesis nula
+Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+  H02: No existe interacción entre ambos factores (años y carteras)
+  H12: Si existe interacción entre ambos factores (años y carteras)
+
+
+si P-value > 0.05 se acepta la hipótesis nula
+Sí P-value < 0.05 se acepta la hipótesis alternativa"
+
+
+
+
+file.choose()
+
+getwd()
+impdata<-read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP5.- ANÁLISIS DE VARIANZA. UNO Y DOS FACTORES. DISEÑO COMPLETAMENTE ALEATORIZADO\\Anova dos factores años carteras ganancias.csv")
+library(tidyverse)
+attach(impdata)
+View(impdata)
+
+
+año<-factor(impdata$año)
+
+carteras<-factor(impdata$carteras)
+
+ganancias<-c(impdata$ganancias)
+
+factorcartañogan_df<-data.frame(año,carteras,ganancias)
+View(factorcartañogan_df)
+
+
+inversiones.df <- factorcartañogan_df[order(factorcartañogan_df$año,factorcartañogan_df$carteras), ]
+
+View(inversiones.df)
+
+
+summary(aov(ganancias~año+carteras+año*carteras,inversiones.df))
+
+
+#otra forma de sacar el anova
+
+anova(lm(ganancias~año+carteras+año*carteras,inversiones.df))
+
+#Aceptación y rechazo de las hipótesis
+
+
+"H0: Los 5 años son homogeneos 
+H1: No todos son homogeneos
+
+p-value < 0.05 <- se rechaza H0
+
+H01: Las 3 carteras son homogeneas
+H11: No todas son homogeneas
+
+p-value < 0.05 <- se acepta H11
+
+H02: No existe interacción entre ambos factores (años y carteras)
+  H12: Si existe interacción entre ambos factores (años y carteras)
+
+p-value < 0.05 <- se acepta H12"
+
+
+
+
+"Para calcular la homogeneidad de varianzas"
+
+library(car)
+leveneTest(inversiones.df$ganancias~inversiones.df$año*inversiones.df$carteras)
+
+"p-value = 0.04183* <0.05  <- se debe tomar con reservas (se debe analizar con precaución la)
+                              la homogeneidad de las varianzas"
+
+"tomando en cuenta lo anterior
+    COMPARACIONES MULTIPLES DE TUKEY EN ANOVA DE DOS FACTORES
+
+El resultado de formar grupos depende de que el intervalor entre la columna lwr y upr contengan al cero
+Estos serán los grupos homogéneos"
+
+
+anovaCartInv<- aov(ganancias~año+carteras+año*carteras,inversiones.df)
+
+TukeyHSD(anovaCartInv)
+
+
+#Hay una interacción significativa si el lwr & upr contiene el cero por lo que tenemos tratamientos homogeneos
+#Con esto se irán formando grupos homogeneos y a su vez 
+
+
+#para calculas LAS MEDIAS POR CONDICIÓN
+"medias por condición: Son las medias de las variables dependientes para cada combinación de factores"
+tapply(inversiones.df$ganancias,list(inversiones.df$año,inversiones.df$carteras),mean)
+
+"la media de la ganancia del 2009 de la cartera A fue de 23.25"
+
+#Para calcular las MEDIAS MARGINALES
+"Son las medias de la variable dependiente para cada nivel individual de un factor"
+
+#Media marginal por año
+tapply(inversiones.df$ganancias,inversiones.df$año,mean)
+
+#Media marginal por cartera
+tapply(inversiones.df$ganancias,inversiones.df$carteras,mean)
+
+
+
+"El test por comparaciones puede resultar muy poco práctico por lo que se usan graficos de interacción
+Se puede hacer respecto a los años y se puede hacer respecto a las carteras"
+
+library(extrafont)
+col1<- c("#2FFFA4","#5F9EA0","#CD3278", "#FF6A6A","#4876FF")
+interaction.plot(inversiones.df$carteras,inversiones.df$año,inversiones.df$ganancias,
+                 fun = mean,col = col1, family = "Times New Roman")
+
+#Hay interacción de las carteras B y C (homogeneos) en los años 2010,2012 y 2013
+
+col2<- c("#5F9EA0", "#FF6A6A","#4876FF")
+interaction.plot(inversiones.df$año,inversiones.df$carteras,inversiones.df$ganancias,
+                 fun = mean,col = col2, family = "Times New Roman")
+#Hay interacción de los años 2011 y 2012 (grupos homogéneos) en las carteras C y B
