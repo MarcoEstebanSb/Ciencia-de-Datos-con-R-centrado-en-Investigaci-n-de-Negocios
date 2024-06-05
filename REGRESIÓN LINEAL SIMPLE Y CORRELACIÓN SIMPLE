@@ -1,0 +1,123 @@
+"Lo que se estudia en este análisis de regresión es la forma de la relación existente entre dos o mas variables
+
+En el análisis de correlación lo que se estudia es el grado o la fuerza de la relación entre tales variables"
+
+
+#         8.2 REGRESIÓN LINEAL SIMPLE
+
+#     8.2.1 Modelo
+
+" Y= B0 + B1X + e
+e: error
+Bi: coeficientes de regresión
+
+Cumplimiento del supuesto de homogeneidad y los errores son independientes
+
+Hipótesis:
+H0 <- x y Y no están relacionadas linealmente
+H1 <- <- x y Y si están relacionadas linealmente
+#   si P-value > 0.05 se acepta la hipótesis nula H0
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa H1"
+
+
+#     8.2 REGRESIÓN LINEAL SIMPLE EN R
+"x: Horas trabajadas
+y: seguros realizados
+Se cree que existe una correlación entre las dos variables
+H0 <- x y Y no están relacionadas linealmente
+H1 <- <- x y Y si están relacionadas linealmente
+#   si P-value > 0.05 se acepta la hipótesis nula H0
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa H1"
+
+
+x<-c(8,9,6,10,5,4,7,9.5,10.5,8.5)
+y<-c(15,19,12,22,6,3,9,20,25,18)
+
+recta <- lm(y~x)
+recta
+
+# La recta será: y = -10.035 + 3.217x
+
+summary(recta)
+
+
+#p-value: 1.475e-06<0.05  Se acepta H1
+#Las horas de trabajo y los seguros si están relacionadas linealmente
+
+#Se puede hacer con la función anova también
+
+anova(recta)
+
+#Para ver graficamente con la nube de puntos y la línea de regresión:
+library(extrafont)
+plot(x,y,col = "black", pch = 16, abline(recta, col = "red",lty = 3),
+     main = "RLS", family = "Times New Roman")
+
+
+#Para analizar la normalidad de los residuos
+
+#primero se obtienen los residuos de la recta ajustada
+
+residuos<-resid(recta)
+
+#Se calcula la media muestral de los residuos obtenidos
+
+mean(residuos)
+mean(resid(recta))
+
+#La media es cero prácticamente. Esto es un buen indicador
+
+
+#Seguidamente se realizan los gráficos para el análisis de normalidad (qqnorm, hist y stem para el de hojas y ramas)
+
+qqnorm(residuos)
+#Sigue la diagonal que es un buen indicador de normalidad pero puede haber datos anomalos a la izquierda
+
+hist(residuos)
+#Lo mismo, está dentro de la curva de normalidad pero parece ser que hay datos anomalos a la izquierda
+
+stem(residuos)
+#Podemos confirmar la falta de simetría y normalidad
+
+
+
+
+#     8.3 COEFICIENTE DE CORRELACIÓN LINEAL DE PEARSON
+
+"El valor ocila entre -1(Correlación inversa: Cuando al aumentar una de las variables la otra disminuye) 
+y +1(Correlación directa: si x aumenta, y también)
+
+Hipótesis:
+H0: p=0
+H1: p≠0
+p: coeficiente de correlación de Pearson"
+
+
+#     8.3.1 CORRELACIÓN LINEAL SIMPLE
+
+"Se desea analizar la facturación de una empresa en millones de euros durante 5 años y como influyen a su
+vez en los gastos en publicidad en millones de euros"
+
+file.choose()
+
+data<-read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP8.- REGRESIÓN LINEAL SIMPLE Y CORRELACIÓN SIMPLE\\Correlacion ventas gastos.csv")
+View(data)
+
+#Para obtener el coeficiente de Correlación:
+
+cor(data$Ventas.Millones.Euros,data$Gastos.public.millones.de.euros)
+
+#coeficiente de cor =  0.8675276
+#La correlación es alta y positiva por lo que es directa por lo que si una variable aumenta la otra también
+
+
+#Para contraste de las Hipótesis
+
+cor.test(data$Ventas.Millones.Euros,data$Gastos.public.millones.de.euros)
+
+# p-value = 0.05672 ≠ 0 por lo que nuestras variables están correlacionadas entre sí
+
+
+
+
+
