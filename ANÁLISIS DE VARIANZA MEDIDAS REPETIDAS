@@ -1,0 +1,111 @@
+"Se caracteriza en que se observa la variable experimental más de una vez, y se quieren comparar dos o más poblaciones.
+Además las poblaciones a comparar serán dependientes
+
+Se deben cumplir tres supuestos:
+  NORMALIDAD      HOMOCEDASTICIDAD  INDEPENDENCIAS DE LAS MUESTRAS
+
+Se utiliza cuando interesa analizar una respuesta cuantitativa en la variable dependiente bajo las condiciones de las
+variables independientes"
+
+
+
+#           6.2 FORMULACIÓN
+
+"Hipótesis
+
+H0: m1 = m2 = ....mr <- igualdad de los efectos medios en los r niveles del factor en estudio
+H1: <- no igualdad de los efectos medios en los r niveles del factor en estudio
+
+#   si P-value > 0.05 se acepta la hipótesis nula H0
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa H1
+
+H01: m1 = m2 = ... mt <- igualdad de los efectos medios de las medidas en el tiempo
+H11: <- no igualdad de los efectos medios de las medidas en el tiempo
+
+#   si P-value > 0.05 se acepta la hipótesis nula H0
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa H1
+
+H02 <- no hay interacción entre el factor y las repeticiones
+H12 <- si hay interacción entre el factor y las repeticiones
+
+#   si P-value > 0.05 se acepta la hipótesis nula H0
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa H1"
+
+
+
+
+#           6.3 ANÁLISIS DE VARIANZA CON MEDIDAS REPETIDAS
+
+"Nuestra tarea en una aseguradora o banco trata sobre la racionalización de tareas para con los empleados, tenemos datos
+de los seguros vendidos durante los primeros 5 meses del año de 10 empleados hombres o mujeres menores de 40 añ0s y 
+otros 10 empleados hombres o mujeres mayores de 40 años
+Queremos saber si debemos encomendar tareas a una determinada edad para ocupar a los demás en otras tareas de la empresa"
+
+
+
+file.choose()
+
+preaseg<-read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP6.- ANÁLISIS DE VARIANZA MEDIDAS REPETIDAS\\Aseguradora asignación de tareas por edad.csv")
+attach(preaseg)
+View(preaseg)
+
+ventasvector<- c(preaseg$Enero,preaseg$Febrero,preaseg$Маrzo,preaseg$Abril,preaseg$Мауo)
+summary(ventasvector)
+
+#convertimos a factor
+
+edad_ft<-factor(preaseg$edad)
+individuo_ft<-factor(preaseg$individuo)
+
+
+#Para convertir columnas a factor:
+
+
+# Guarda los nombres originales de las columnas que deseas convertir en factores
+nombres_originales <- names(preaseg)[2:6]
+
+# Crear vector para los niveles de los factores
+niveles_factor <- rep(nombres_originales, each = 20)
+
+# Convierte los nombres de las columnas en factores
+nombres_factor <- as.factor(niveles_factor)
+
+
+# Ahora los nombres de las columnas de la B a la F están convertidos en factores
+
+
+meses_ft<-nombres_factor
+
+#creamos el dataframe con los factores
+
+aseguradora<-data.frame(edad_ft,meses_ft,individuo_ft,ventasvector)
+View(aseguradora)
+
+
+#reordenamos la tabla
+
+aseg.orden<-aseguradora[order(aseguradora$edad_ft), ]
+View(aseg.orden)
+
+
+#Realizamos el anova
+
+anova1<- summary(aov(ventasvector~edad_ft*meses_ft+Error(individuo_ft),aseg.orden))
+anova1
+"La interacción edad:meses no es significativa como si lo son por separado"
+
+#Se debe acompletar con tablas anova bifactoriales
+
+anova2<- summary(aov(ventasvector~individuo_ft*meses_ft,aseg.orden))
+anova2
+
+anova3<- summary(aov(ventasvector~edad_ft*meses_ft,aseg.orden))
+anova3
+
+
+"Podemos concluir que no hay diferencias entre los meses en los que se hicieron las ventas por parte de los empleados
+de diferente edad dentro de estos tramos de edad por lo que podemos decidir dos cosas:
+1. Continuar con la misma asignación de tareas 
+2. Dividir a los empleados en mas tramos de edad, aunque dependería del número de empleados"
+
+
