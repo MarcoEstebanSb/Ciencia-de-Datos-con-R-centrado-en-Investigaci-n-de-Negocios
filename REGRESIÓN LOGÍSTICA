@@ -1,0 +1,77 @@
+"O modelo de Regresión Logit
+
+Pretende contrastar K covariables para estudiar cuales de ellas son significativas para explicar la variable
+dicotómica(Solo puede tomar dos valores posibles (1,0. éxito,fracaso)) Y
+
+El modelo es el siguiente:
+log(p/1-p) = B0 + B1X1 + ... + BiXi
+
+para calcular la probabilidad(p):
+
+p=(exp(B0 + SUM(BiXi)))/(1+exp(B0 + SUM(BiXi)))
+
+Si se tienen valores pesados en las colas se deben utilizar los modelos de regresión logit"
+
+
+
+#             12.2 REGRESIÓN LOGIT
+
+"Se desea ampliar al personal de la empresa (concecionario de coches), para ello se han recabado datos de la
+última semana en ventas de los nueve agentes comerciales con cuatro variables:
+Edad    Sexo (1.-hombre 0.-mujer)
+Actvidad 1 (1.-vendió uns de autos de marca primera en la última semana. 0.- no vendió)
+Actividad 2 (1.-vendió uns de autos de marca segunda en la última semana. 0.- no vendió) "
+
+
+"El concesionario pretende vender más autos de marca primera porque el beneficio es mayor que con el de marca 
+segunda por lo que se establecerá la probabilidad de venta desde la actividad 1 que será nuestra variable
+dependiente (Y) "
+
+file.choose()
+
+ventasporauto<-read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP12.- REGRESIÓN LOGÍSTICA\\Autos venta por marca.csv")
+View(ventasporauto)
+
+attach(ventasporauto)
+ventasdf<-data.frame(ventasporauto)
+ventasdf
+
+# Para construir el modelo de regresión Logir se usa gml con el parámetro family = binomial
+
+logitmodel<-glm(ventasdf$Actividad.1~ventasdf$Edad+ventasdf$Sexo+ventasdf$Actividad2,
+                family = binomial,data = ventasdf)
+
+logitmodel
+summary(logitmodel)
+
+"el modelo quedaría de la siguiente forma:
+log(p/1-p)= 16.0253 +  0.2167 (edad)  - 20.0592 (Sexo) - 20.2954  (Actividad 2) 
+
+para calcular la probabilidad:
+
+p = (exp(16.0253 +  0.2167 (edad)  - 20.0592 (Sexo) - 20.2954  (Actividad 2)))/
+    (1+exp(16.0253 +  0.2167 (edad)  - 20.0592 (Sexo) - 20.2954  (Actividad 2))) "
+
+
+#p <- (exp*(16.0253+0.2167*(edad)-20.0592*(Sexo)-20.2954*(Actividad 2)))/(1+exp*(16.0253+0.2167*(edad)-20.0592*(Sexo)-20.2954*(Actividad 2)))
+
+p <- (exp(16.0253+0.2167*(30)-20.0592*(1)-20.2954*(0)))/(1+exp(16.0253+0.2167*(30)-20.0592*(1)-20.2954*(0)))
+p
+logprobmodel<-(16.0253+0.2167*(25)-20.0592*(1)-20.2954*(0))
+logprobmodel
+
+p2<-(exp(logprobmodel))/(1+exp(logprobmodel))
+p2
+
+#             12.3 REGRESIÓN PROBIT
+
+"Solo se añade link = probit al parámetro family = binomial en nuestro modelo "
+
+
+probitmodel<-glm(ventasdf$Actividad.1~ventasdf$Edad+ventasdf$Sexo+ventasdf$Actividad2,
+                family = binomial(link = probit),data = ventasdf)
+
+probitmodel
+
+"el modelo quedaría de la siguiente forma:
+  log(p/1-p)= 3.5444 +  0.1401 (edad)  - 6.1605 (Sexo) - 6.3246  (Actividad 2)"
