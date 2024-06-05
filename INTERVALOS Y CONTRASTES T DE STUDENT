@@ -1,0 +1,91 @@
+"La mayoría de procedimientos paramétricos requiere conocer la forma de distribución
+para las mediciones resultantes de la población estudiada
+
+Este tipo de pruebas solo pueden ser aplicadas bajo la condición de normalidad 
+y con variables medidas en escala de intervalo o de razón, es decir, se requiere
+como mínimo una escala de intervalo osea que LOS DATOS DEBEN DE TENER AL MENOS UN
+ORDEN Y UNA NUMERACIÓN DEL INTERVALO"
+
+
+#     4.1 DISTRIBUCIÓN T DE STUDENT
+
+"   n <- grados de libertad
+  cuando nuestra n aumenta nuestra forma de distribución converge con la 
+  ideal que es N(media=0, desvest=2)<-N(0,1)"
+
+par(mfrow=c(2,2))
+tstudent<- seq(-3,3,len=100)
+
+plot(tstudent,dt(tstudent,3),type = "l", col = "#7FFFD4", main = "n = 3", 
+     ylim = range(0,0.4))
+lines(tstudent,dnorm(tstudent), col = "#5F9EA0", lty=2)
+
+
+plot(tstudent,dt(tstudent,4),type = "l", col = "#7FFFD4", main = "n = 4", 
+     ylim = range(0,0.4))
+lines(tstudent,dnorm(tstudent), col = "#5F9EA0", lty=2)
+
+
+plot(tstudent,dt(tstudent,10),type = "l", col = "#7FFFD4", main = "n = 10", 
+     ylim = range(0,0.4))
+lines(tstudent,dnorm(tstudent), col = "#5F9EA0", lty=2)
+
+plot(tstudent,dt(tstudent,50),type = "l", col = "#7FFFD4", main = "n = 50", 
+     ylim = range(0,0.4))
+lines(tstudent,dnorm(tstudent), col = "#5F9EA0", lty=2)
+
+plot(tstudent,dt(tstudent,100),type = "l", col = "#7FFFD4", main = "n = 100", 
+     ylim = range(0,0.4))
+lines(tstudent,dnorm(tstudent), col = "#5F9EA0", lty=2)
+
+# entre más aumenten nuestros grados de libertad n, nuestra forma de 
+# distribución converge con la ideal que es N(media=0, desvest=2)<-N(0,1)
+
+
+par(mfrow=c(1,1))
+
+# con 50 grados de libertad ya es prácticamente la normal
+
+
+
+#     4.2 DISTRIBUCIÓN T DE STUDENT CON R
+"   H0:  <- nuestras medias poblacionales son iguales
+    Hi:  <- nuestras medias poblacionales no son iguales"
+#   si P-value > 0.05 se acepta la hipótesis nula
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+"Se cuenta con el PIB percapita de Francia y Suecia (Países desarrollados) de los años 2000 a 2013
+
+    H0 : no existen diferencias entre la media de francia y la media de suecia
+    H1 : existen diferencias entre la media de francia y la media de suecia
+    si P-value > 0.05 se acepta la hipótesis nula
+    Sí P-value < 0.05 se acepta la hipótesis alternativa"
+
+
+francia<-c(23.7,24.5,25,25.6,26.5,27.3,28.4,29.6,30.1,29.3,29.9,30.7,31.1,31.3)
+length(francia)
+suecia<-c(30.2,28.5,29.9,31.1,32.4,33,35,36.9,36.1,31.5,37.3,40.8,42.8,43.8)
+length(suecia)
+
+PIBfs <- data.frame(francia,suecia)
+PIBfs
+
+t.test(PIBfs$francia,PIBfs$suecia)
+
+#  p-value = 0.0001611 < 0.05  se acepta H1
+
+"Entre más grande el intervalo de confianza más pequeño el p-value
+
+95 percent confidence interval:
+ -9.972362 -3.784781
+Como el intervalo de confianza es grande confirma nuestra aceptación por H0"
+
+
+"Las medias difieren significativamente  por lo que confirma nuestra aceptación de H0
+
+ mean of x   mean of y 
+ 28.07143    34.95000 "
+
+summary(PIBfs$francia)
+summary(PIBfs$suecia)
+
