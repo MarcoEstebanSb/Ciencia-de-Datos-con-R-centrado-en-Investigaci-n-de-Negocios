@@ -1,0 +1,173 @@
+"El Ánalisis de Supervivencia engloba toda una serie de técnicas estadísticas para analizan una serie de datos 
+dependiendo del tiempo que transcurre hasta que un evento sucede. Cuando estos eventos suceden se denominan fallos
+por lo que el Ánalisis de Supervivencia es un análisis de los tiempos de fallo. Es muy utilizado en el estudio de 
+medicamentos y el tiempo de vida de los pacientes dentro del campo biomédico.
+También son utilizadas en las industrias en el estudio de tiempo de vida de algún equipo
+
+Nos podemos encontrar con dos alternativas a la hora del ánalisis de estos tiempos de fallo:
+
+1.- Que se tenga CONTROL sobres las covariables o predictoras que influyen sobre la variables tiempo de fallo
+
+2.- Que no se tenga CONTROL sobres las covariables o predictoras que influyen sobre la variables tiempo de fallo
+
+Lo normal en un estudio biomédico es tener control sobre todas las variables influyentes
+
+
+También puede darse el caso siguiente. Por ejemplo: 
+En un estudio biomédico donde se estudia el efecto de un medicamento sobre un paciente oncológico puede darse que
+el paciente muera antes del tiempo estimado, mueran por causas ajenas al estudio, dejen de ir a la consulta, etc.
+estos casos se llaman casos censurados
+
+Los tipos de censura son 5:
+
+Censura Tipo I: Censura Temporal: Se da cuando se tiene un tiempo de fallo muy prolongado (por ejemplo años) y no
+se puede esperar a que fallen (por ej: motores) para recoger las observaciones y realizar el experimento. Por tal
+razón se prefija un nuevo Tiempo de Fallo más corto para el experimento 
+
+Censura Tipo II: Es el caso que se da cuando una vez alcanzado el Tiempo de Fallo del experimento solo escasos
+números de individuos han fallado o incluso ninguno lo ha hecho por lo que las observaciones serán muy poco 
+significativas. En este caso se suele prolongar el tiempo de fallo
+
+Censura Aleatoria: Se dá en caso de que el Tiempo de Fallo se dé por otras causas no consideradas en el
+experimento. En este caso se debe incluir en el experimento una nueva variable llamada Tiempo de Censura.
+
+Censura por la Derecha o la Izquierda: Cuando los valores de la variable Tiempo de Fallo son muy grandes como para
+observarlos a todos se llama censura por la derecha, en caso contrario, se habla de censura por la derecha 
+
+Censura por Intervalos: Si se da el caso de que los tiempos de fallo no ocurran durante el experimento, faltarían
+Tiempos de Fallo anteriores al comienzo del experimento y tras su conclusión .
+
+
+Este ánalisis consta de varios procedimientos 
+Las distribuciones de Tiempo de Fallo Habituales son:
+Dist exponencias  | Dist Weibull  | Dist log normal | Dist log logística
+
+Para modelar las covariables explicativas o predictoras sobre el tiempo de fallo se cuenta con estos modelos de 
+Regresión:
+Weibull | Exponencial | Azar proporcional | Tiempo de fallo acelerado
+
+Para estimar la función de Supervivencia se tienen los siguientes estimadores: 
+Kaplan - Meier  | Método del límite producto
+
+Para la comparación de Curvas de Supervivencia tenemos: 
+Test de Log Rank o Test de Rangos Logarítmicos de Savage  | "
+
+
+
+#               16.2.- ÁNALISIS DE SUPERVIVENCIA
+
+
+"Se analizaron 33 productos que son baterias de alta capacidad y se anotó su tiempo de supervivencia en semanas.
+Sí su tiempo era superior a 52 semanas correspondía a éxito del producto (valor igual a 1, éxito, de la variable
+dependiente Y con probabilidad p), y siendo Y = 0 si ese tiempo de supervivencia era inferior o igual a 52 
+semanas, fracaso (1-p), la covariable AG presencia (AG= 1) o ausencia (AG=0) se refiere a un nuevo compuesto 
+químico añadido a la bateria que se cree aumenta su potencia o no"
+
+file.choose()
+datos<-read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP16.- ANÁLISIS DE SUPERVIVENCIA\\anSuperBaterías.csv")
+attach(datos)
+View(datos)
+
+"Se pueden generar las curvas de supervivencia de Kaplan - Meier. Para generar las curvas se hacen sobre los 
+vectores time y status"
+
+
+pob<-data.frame(time,status)
+pob
+
+library(survival)
+
+fit<-survfit(Surv(time, status)~1,data = pob, se.fit = TRUE, conf.int = .95, type = "kaplan-meier")
+"Surv: queremos el ajuste de superv de time y status
+~1: indica que solo se tiene un grupo de supervivencia a analizar
+se.fit = TRUE: Indica que extraiga la estimación de los errores estándar
+a un intervalo de confianza de 0.95
+type: se solicita el tipo de curva"
+
+fit
+
+par(mfrow=c(1,1))
+#se plotea:
+plot(fit, ylab = "probabilidad de supervivencia")
+
+"observando el plot lo que interesa es la línea continua, que indica la probabilidad de supervivencia en función
+del tiempo, las lineas discontinuas se refieren al intervalo de confianza de la probabilidad de sobrevivir
+
+Para obtener la probabilidad de los puntos donde la curva cambia, se utiliza la función summary"
+
+summary(fit)
+
+" time n.risk n.event survival std.err lower 95% CI upper 95% CI
+   49     18       1   0.9444  0.0540       0.8443        1.000
+   53     10       1   0.8500  0.1019       0.6720        1.000
+   54      9       1   0.7556  0.1270       0.5434        1.000
+   55      8       2   0.5667  0.1499       0.3375        0.952
+   56      6       1   0.4722  0.1518       0.2515        0.887
+   57      5       2   0.2833  0.1378       0.1092        0.735
+   58      3       1   0.1889  0.1200       0.0544        0.656
+   59      2       1   0.0944  0.0898       0.0147        0.608
+   62      1       1   0.0000     NaN           NA           NA"
+
+"La columna survival muestra la probabilidad de supervivencia (el eje Y del gráfico). Entonces podemos deducir
+que la probabilidad acumulativa (no puntual) para sobrevivir a la semana 55 es de 56.67%. Sobrevivir a que se 
+agote la batería más alla de la semana 62 es cero.
+
+Ploteamos ahora con color rojo en la linea con grosor (lwd) 2 y sin intervalos de confianza:"
+
+plot(fit, col = "#FF3030", lwd = 2, conf.int = FALSE, ylab="Probabilidad de supervivencia", xlab = "Tiempo", 
+     family = "Times New Roman")
+
+
+"Se ha dado el caso hasta ahora de tener un solo grupo de productos o baterías. Ahora se van a crear dos grupos
+en función de la variable AG con presencia =1 o ausencia = 0, que se cree tiene la capacidad de aumentar la 
+capacidad de energía de la batería. Así se podrán comparar dos curvas de supervivencia mediante la prueba de 
+long-rank de Kaplan-Meier (o la prueba de Mantel-Cox)"
+
+
+pob1<-data.frame(time, status, AG)
+
+fit1<- survfit(Surv(time, status)~AG,data = pob1)
+
+#~AG indica que se tienen dos grupos a analizar
+
+summary(fit1)
+
+"Aquí se pueden extraer las probabilidades de supervivencia acumulativas y no puntuales de las baterías en
+función del tiempo de supervivencia en semanas y de si tienen o no el compuesto químico AG
+
+Por ej: Se deduce de esto que la probabilidad acumulativa y no puntual de sobrevivir a la semana 53 dentro del
+grupo 2 que tiene presencia de AG (AG=1) es del 88.9% sobrevivir al agotamiento de la batería más allá de la 
+semanda 62 es cero
+
+A continuación se desarrolla un plot de dos curvas, sin la característica AG en rojo y con AG en verde y con
+un ancho de lwd=2"
+
+plot(fit1, col = 2:3, lwd = 2)
+
+#Ahora confrontaremos las dos curvas con con el Log-Rank test
+
+
+ConfrontacionCurvas<- survdiff(Surv(time, status)~AG,data = pob1)
+
+ConfrontacionCurvas
+
+"N: número de baterías analizadas en cada grupo
+Observed: número de agotamiento de baterías observadas 
+Expected: número de agotamiento de baterías esperadas
+
+Por últmimo se muestran los valores para el cálculo del estadístico de prueba de Chi-Cuadrado
+
+El p-value = 0.6 > 0.05 entonces se acepta la hipótesis nula: la tendencia de la supervivencia en los dos grupos
+es significativamente la misma "
+
+
+#Para calcular el riesgo relativo en comparación con los dos grupos con AG y sin AG:
+
+RR <- (2/1.47)/(9/9.53)
+RR
+
+#RR = 1.440665
+
+"Después de haber tenido una prueba de long-rank no significativa, se obtiene una relación de riesgo mayor a 1,
+es decir, el grupo sin AG(AG=0) tiene un riesgo de agotamiento 1.44 veces mayor que el grupo con AG. 
+Prácticamente el mismo riesgo"
