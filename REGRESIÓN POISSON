@@ -1,0 +1,96 @@
+"La regresión Poisson es un análisis intermedio entre la regresión logística y la regresión lineal.
+intermedio enyre un análisis tipo binomial y un análisis de tipo continuo"
+
+
+"Se supone que la variable dependiente sigue la distribución de Poisson
+
+El modelo queda:
+
+Log r = B0 + B1X1 + B2X2 + ... +BkXk
+
+r: tasa sobre la variable dependiente Y
+
+Este modelo es muy útil en caso de recuento de datos:
+Ej:
+    número de máquinas estropeadas
+    número de chips rotos
+    número de fallecidos
+    número de número de casos de una enfermedad concreta
+    número de ratones inoculados con un medicamento
+    número de enfermos"
+
+
+"La siguiente investigación tiene como objetivo LA REDUCCIÓN DEL GASTO EN MEDICAMENTOS Y SERVICIOS DE SALUD
+PÚBLICA por usuarios con  enfermedades relacionadas con las alergías a través de la prevención.
+
+Durante los meses de polinización se piensa que los recuentos de polen por gramíneas (en granos por m3)
+pueden depender de tres covariables: Cantidad de lluvia (en litros por m2), velocidad del viento (en km/h)
+y temperatura (media del dia en grados centigrados).
+
+El gasto en salud pública en antihistaminicos y otros medicamentos, asi como la utilización de servicios de
+salud en casos de emergencias, por los enfermos alérgicos es muy grande por lo que el objetivo es calcular
+un modelo de regresión poisson predictivo de la cantidad de polen del día para prevención a modo de semáforo.
+Siendo de 0-20% un semáforo verde, 21-40% semáforo amarillo, 41-60% semáforo naranja y más del 61% semáforo 
+rojo.
+
+El modelo de regresión quedará
+
+Log rij = B0 + B1(lluvia) + B2(viento) + B3(temperatura) "
+file.choose()
+polendta<-read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP11.- REGRESIÓN POISSON\\polen.csv")
+str(polendta)
+
+#Para calcular el modelo de regresión de Poisson se hace con la func glm
+
+regPoisson <- glm(polendta$Polen~polendta$lluvia+polendta$viento+polendta$temperatura,
+                  family = poisson,data = polendta)
+
+regPoisson
+
+#Con summary veremos los p-values para determinar la significancia de cada variable
+
+summary(regPoisson)
+
+#podemos ver que la lluvia no es significativa en nuestro modelo
+
+
+#     Realizandolo por pasos con ambos métodos
+library(MASS)
+porpasos<-stepAIC(regPoisson,direction = "both")
+
+"Step:  AIC=145.82
+polendta$Polen ~ polendta$viento + polendta$temperatura"
+
+
+#planteamos nuestro nuevo modelo
+
+regPoisson2 <- glm(polendta$Polen~polendta$viento+polendta$temperatura,
+                               family = poisson,data = polendta)
+summary(regPoisson2)
+
+regPoisson2
+
+
+"Nuestro modelo quedaría de la siguiente forma:
+
+Log rij = 2.39191 + 0.02509(Viento) + 0.05919(Temperatura) 
+
+Para realizar las predicciones: "
+
+
+
+
+exp(coef(regPoisson2))  #para eliminar el logaritmo
+
+# =  10.934393 + 1.025412(Viento) + 1.060977(Temperatura)
+
+
+#probemos con una temperatura de 36 gcent y viento de 16 km/h
+
+pred<-10.934393 + 1.025412*16 + 1.060977*36
+pred
+#[1] 69.28216
+
+#El semáforo está en rojo porque >61
+
+
