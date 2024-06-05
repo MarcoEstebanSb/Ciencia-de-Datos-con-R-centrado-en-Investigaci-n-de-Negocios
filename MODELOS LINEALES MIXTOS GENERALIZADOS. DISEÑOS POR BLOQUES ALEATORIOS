@@ -1,0 +1,235 @@
+"Estos modelos son una mezcla entre las técnicas de análisis de varianza y regresión
+
+Se pueden utilizar cuando los datos tienen una forma de estructuración jerárquica o de agrupación (otros modelos
+a utilizar son las series temporales o de medidas repetidas) 
+
+Este modelo es el más utilizado en el campo de la ciencia (medicina, biología, ecología)
+Lo que se obtiene con este modelo son:
+coeficientes fijos    coeficientes aleatorios     y terminos de error
+
+
+el modelo mixto quedaría de la siguiente forma
+
+Yij = a + B*Xij + aj + eij
+
+puede haber distintas pendientes por cada variable por lo que se irían añadiendo a la fórmula tales pendientes
+(bj, cj, dj) "
+
+#            13.3 MODELOS LINEALES GENERALIZADOS MIXTOS. BLOQUES ALEATORIZADOS
+
+"Se quiere estudiar las ganancias en 5 carteras de inversión correspondientes a diversos países que constan de
+mas de 100 acciones cada uno de los cuales se seleccionaron las 12 acciones más importantes que son además comunes
+a las cinco carteras. Se especifica la ganancia final anual en miles de euros en cada acción según la cartera de
+inversión. Actualmente el cliente únicamente invierte en la cartera P5. Como el cliente ha ganado mucho y quiere
+diversificar su inversión a otras carteras por seguridad, se quiere estudiar al resto de las carteras y si es 
+posible invertir en otras"
+
+
+file.choose()
+
+inversiones<-read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP13.- MODELOS LINEALES MIXTOS GENERALIZADOS. DISEÑOS POR BLOQUES ALEATORIOS\\CarterasPaisesAccionesBloques mixtos.csv")
+View(inversiones)
+
+"El método es idéntico al de análisis de varianza de dos factores"
+
+#Vector ganancias
+
+ganancias<-c(inversiones$A1,inversiones$A2,inversiones$A3,inversiones$A4,inversiones$A5,inversiones$A6,
+             inversiones$A7,inversiones$A8,inversiones$A9,inversiones$A10,inversiones$A11,inversiones$A12)
+ganancias
+#Convertimos a factor
+
+carterasft<-factor(inversiones$Carteras)
+
+
+#Para convertir las columnas a factor
+
+    # Guarda los nombres originales de las columnas que deseas convertir en factores
+nombres_originales <- names(inversiones)[2:13]
+
+    # Crear vector para los niveles de los factores
+niveles_factor <- rep(nombres_originales, each = 5)
+
+    # Convierte los nombres de las columnas en factores
+nombres_factor <- as.factor(niveles_factor)
+
+
+    # Ahora los nombres de las columnas de la B a la F están convertidos en factores
+
+
+accionesft<-nombres_factor
+
+
+#Creamos nuestro data frame
+
+dfinversiones<-data.frame(carterasft,accionesft,ganancias)
+View(dfinversiones)
+
+
+#         Modelo Lineal:
+"analizar el efecto fijo del modelo lineal es una buena forma de comenzar a analizar el efecto de un bloque"
+
+modelolineal<-lm(ganancias~dfinversiones$carterasft+dfinversiones$accionesft,data = dfinversiones)
+modelolineal
+
+#Se analiza el anova
+
+anova(modelolineal)
+
+#Tanto acciones como carteras son significativos
+
+#         Modelo Mixto     los efectos aleatorios se introducen en la función con el parámetro random
+
+library(nlme)
+modelomixto<-lme(dfinversiones$ganancias~dfinversiones$carterasft,random = ~1|dfinversiones$accionesft,
+                 data = dfinversiones)
+
+
+#corregido***
+modelomixto <- lme(ganancias ~ carterasft, random = ~1 | accionesft, data = dfinversiones)
+modelomixto
+
+#Se realiza el anova
+anova(modelomixto)
+#Carteras es significativo
+
+#summary para sacar cuales carteras son significativas
+summary(modelomixto)
+#Todas las carteras son significativas
+
+
+#probando intercambiando factores
+modelomixto2 <- lme(ganancias ~ accionesft, random = ~1 | carterasft, data = dfinversiones)
+modelomixto2
+
+anova(modelomixto2)
+summary(modelomixto2)
+#Tenemos dos acciones que no son significativas
+
+
+#       Efectos Aleatorios
+
+"Se elige la estructura de los efectos aleatorios. 
+Por un lado, un modelo sin efecto aleatorio con un estimador LMER (estimador de máxima verosimilitud restrindiga)
+con la función gls."
+
+efectosaleat1<-gls(ganancias~carterasft,data = dfinversiones)
+
+"Por otro, un modelo que incluya la varianza aleatoria de la constante por bloques, con la función lme"
+
+efectosaleat2 <- lme(ganancias ~ carterasft, data = dfinversiones, random = ~1 | accionesft)
+
+#Se calcula el anova
+anova(efectosaleat1,efectosaleat2)
+anova(efectosaleat1,modelomixto)
+#Nos dice que es mejor el de efectos aleatorios 2 que es lo mismo que el modelo mixto
+#El segundo modelo con efecto aleatorio por bloque
+
+
+
+#       Efectos Fijos
+
+"Se elige la estructura de los efectos fijos. Para ello se comparan modelos anidados más adecuados por nuestros
+efectos aleatorios (random) se utiliza el método ML en el parámetro method usando de nuevo la función lme"
+
+efectosfijos1 <- lme(ganancias ~ 1, random = ~1|accionesft, method = "ML", data = dfinversiones)
+
+efectosfijos2 <- lme(ganancias ~ carterasft, random = ~1|accionesft, method = "ML", data = dfinversiones)
+
+#Se compara cual es mejor
+
+anova(efectosfijos1,efectosfijos2)
+#Es mejor el segundo modelo con efecto fijo sobre el tratamiento que el primer modelo con solo el efecto de
+#la constante
+
+
+
+#             Modelo Final Mixto Generalizado
+
+"Trás su cálculo se deben comprobar los supuestos de normalidad y homocedasticidad, que se realizará con la
+representación de los residuos, ya que estas supocisiones deben cumplirse para que el modelo sea adecuado
+
+Se crea el modelo que es lo mismo que el de modelo mixto:"
+
+modelomixtogen<-lme(ganancias~carterasft,random = ~1|accionesft, data = dfinversiones)
+modelomixtogen
+
+#anova
+anova(modelomixtogen)
+#indica que los tratamientos son significativos
+summary(modelomixtogen)
+#Las carterass son significativas de la 2 a la 5
+
+"El modelo final quedaría como:
+  Y = 11.4751 + 5.32952 *(Carteras2-5) 
+
+Se deben de cumplir los supuestos de normalidad y homocedasticidad, para ello se analizan los residuos:"
+
+residuos<- residuals(modelomixtogen,type = "normalized")
+
+#se encaja el modelo final con la función fitted para construir más tarde las coordenadas del plot
+enc <- fitted(modelomixtogen)
+
+#Se construye el plot
+plot(residuos~enc, xlab="valores", ylab="residuos", main="Residuos y valores")
+#Se representa una linea en el eje a la altura del 0
+abline(h=0)
+
+"Parece que hay una varianza común pero no está claro
+Se usará el histograma de los residuos"
+
+hist(residuos, main = "Histograma de Residuos", xlab = "Residuos")
+#Parece que no hay una distribución totalmente normal. Usemos qqnorm:
+
+qqnorm(residuos)
+qqline(residuos)
+
+"Parece que al final los datos no se ajustan. No se ajusta del todo mal a la normalidad
+Cuando no hay normalidad u homocedasticidad o las dos se pueden realizar transformaciones:
+
+1.- Se realiza una transformación de los datos originales con log(datos)"
+
+finalmodel<-lme(log(ganancias)~carterasft,data = dfinversiones,random = ~1|accionesft)
+
+summary(finalmodel)
+
+"al analizar las gráficas de los residuos indicaría su no ajuste total a al normalidad así como a la 
+homocedasticidad"
+
+mfresiduos <- residuals(finalmodel, type = "normalized")
+
+encaje <- fitted(finalmodel)
+
+par(mfrow=c(1,3))
+plot(mfresiduos~encaje, xlab = "valores", ylab = "residuos", main = "Residuos y Valores")
+abline(h=0)
+
+hist(mfresiduos, main = "Histograma de Residuos", xlab = "Residuos")
+
+qqnorm(mfresiduos)
+qqline(mfresiduos)
+
+#No hay un ajuste deseado
+
+
+"2.- Se realiza una transformación con log(datos,10) log base 10 "
+
+finalmodel2<-lme(log(ganancias,10)~carterasft,data = dfinversiones,random = ~1|accionesft)
+
+summary(finalmodel2)
+
+#Su representación gráfica para comprobar los supuestos son:
+
+
+mfresiduos2 <- residuals(finalmodel2, type = "normalized")
+
+encaje2 <- fitted(finalmodel2)
+
+par(mfrow=c(1,3))
+plot(mfresiduos2~encaje2, xlab = "valores", ylab = "residuos", main = "Residuos y Valores")
+abline(h=0)
+
+hist(mfresiduos2, main = "Histograma de Residuos", xlab = "Residuos")
+
+qqnorm(mfresiduos2)
+qqline(mfresiduos2)
