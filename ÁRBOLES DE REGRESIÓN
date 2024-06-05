@@ -1,0 +1,117 @@
+"Los Árboles de Regresión son una técnica consistente en descubrir relaciones condicionales en un gran número de 
+covariables independientes y una dependiente.
+Son árboles de Regresión cuando la variable dependiente es continua. Con ellos se pueden sustituir a los modelos de
+regresión lineales y no lineales y modelizar interacciones entre covariables predictoras que más contribuyen
+a la variabilidad de la variable dependiente.
+
+Cuando se desea reducir el número de nodos finales o ramas finales se poda (pruned) el árbol, es decir, se
+calculan los árboles óptimos
+Método de poda a usar: Coste de complejidad: Es una medida del coste de tener un árbol más complejo, teniendo en
+cuenta el error del ajuste del árbol. Buscamos minimizar el coste de complejidad"
+
+"Tenemos 14 variables con ganancias en euros de distintas acciones en bolsa que son las medias semanales de los 
+últimos dos años. Se pretende entablas las relaciones y relevancia en dichas relaciones de las variables. El 
+objetivo es estudiar que variables y en que cantidad se relacionan más con la inversión en la variables llamada
+técnicas"
+
+#Exportamos el csv
+file.choose()
+ganancias<-read.csv("C:\\Users\\John\\Documents\\ME\\ING IND\\DATA SCIENCE\\CAP14.- ÁRBOLES DE REGRESIÓN\\gananciasaccionesbolsa.csv")
+
+
+attach(ganancias)
+View(ganancias)
+
+library(rpart)
+
+#Se procede a construir el árbol. En method="anova"
+
+arbol<-rpart(tecnicas~acciona+acerinox+bankia+enagas+ferrovial+gamesa+iberdrola+indra+mediaset+merlin+ohl+red,
+             data = ganancias,method = "anova")
+arbol
+
+#Se obtienen la siguiente información:
+
+"1) root 93 1.675460e+04  4.68957000  
+   2) gamesa< 0.105 79 2.460252e+03  2.32000000  
+     4) mediaset>=26.15 49 1.129086e+02  1.05449000 *
+     5) mediaset< 26.15 30 2.140695e+03  4.38700000  
+      10) ohl< 0.055 14 6.189286e-02  0.03928571 *
+      11) ohl>=0.055 16 1.644439e+03  8.19125000 *
+   3) gamesa>=0.105 14 1.134775e+04 18.06071000 *
+
+1.- Se tienen 93 elementos. 79 se situan en el nodo de la izquierda y 14 en el nodo de la derecha
+
+2.- El orden de importancia de mayor a menor explicación de la variable tecnicas respecto a las demás variables
+son gamesa, mediaset y ohl. Los nodos terminales (los que dan explicación a la variable tecnicas) aparecen
+con un asterico en el árbol
+
+3.- A un nivel de gamesa< 0.105 y un nivel de mediaset>=26.15 euros, el logarito de concentración 
+de tecnicas es 1.05449000 *; con exp(1.05449000)=2.870511 se puede concluir que la cantidad de 
+tecnicas será de 2.870511 euros
+
+4.- A un nivel de gamesa< 0.105 y un nivel de mediaset< 26.15 y un nivel de ohl< 0.055 el logaritmo de
+concentración de tecnicas es de 0.03928571 *; con exp(0.03928571)=1.040068 se puede concluir que la cantidad de
+tecnicas será de 1.040068 euros
+
+5.- A un nivel de gamesa< 0.105 y un nivel de ohl>=0.055 euros, el logaritmo de concentración de tecnicas es de 
+8.19125000 * euros; con exp(8.19125000)=3609.231 euros; se puede concluir que la cantidad de tecnicas será de 
+3609.231 euros
+
+6.- A un nivel de gamesa>=0.105, el logaritmo de concentración de tecnicas es de 18.06071000 * euros;
+con exp(18.06071000)=69769674 euros, se puede concluir que la cantidad de tecnicas será de 69769674 euros 
+
+Una vez extraída la información del árbol calculado se plotea. con el parámetro margin=0.1, se delimita el árbol
+en el área gráfica de R para que aparezca completamente"
+library(extrafont)
+plot(arbol, margin = 0.1)
+text(arbol, family = "Times New Roman")
+
+
+
+
+#               14.4 PRUNED O PODADO DEL ÁRBOL
+
+"Se utiliza cuando el árbol no queda claro por aparecer muchas variables o porque estas variables se superponen
+unas a otras apareciendo la misma variable en varios niveles del árbol. De esta manera se calculan los
+Árboles Óptimos. Para eso se utiliza la función plotcp, con col =: se especifica el color de la línea del nivel
+de significación"
+
+plotcp(arbol,pch=1,col = "#CD4F39")
+
+"Realmente no se podría cortar el árbol porque el punto de corte debería aparecer sobre la línea de significación
+Para seguir con el ejemplo se usará el punto de corte 0.061
+
+Se usa la func prune y el parámetro de corte se pone en cp=0.061"
+
+
+arbol2<-prune(arbol,cp=0.061)
+arbol2
+
+"Para un nivel de gamesa< 0.105 el logaritmo de concentración será de 2.32000 *euros; con exp(2.32000 *)
+podemos concluir que la cantidad de técnicas será de 10.17567 euros"
+exp(2.32000)
+
+"Ya una vez echo el corte la única variable importante y relevante que le da explicación a la variable dependiente
+tecnicas es gamesa
+lo ploteamos:"
+
+plot(arbol2,margin = 0.1)
+text(arbol2)
+
+
+
+#               14.5 ÁRBOL DE CLASIFICACIÓN
+
+"Para realizar el árbol de clasificación sobre una variable cualitativa dicotómica (Variable 
+cualitativa dicotómica: aquella variable que sólo puede tomar dos valores posibles, 
+por ejemplo sí/no, hombre/mujer.) se utiliza el índice de Ginni como method=class "
+
+arbol3<-rpart(tecnicas~acciona+acerinox+bankia+enagas+ferrovial+gamesa+iberdrola+indra+mediaset+merlin+ohl+red,
+             data = ganancias,method = "class")
+arbol3
+#ploteamos 
+
+plot(arbol3,margin = 0.1)
+text(arbol3)
+
