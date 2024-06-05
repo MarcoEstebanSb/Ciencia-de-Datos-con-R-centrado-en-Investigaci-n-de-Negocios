@@ -1,0 +1,96 @@
+#         9.1 MODELO DE REGRESIÓN LINEAL MÚLTIPLE
+
+"El análisis se realiza en dos fases:
+Primero cuales variables Xi son significativas para predecir a la dependiente
+Segundo se estiman los coeficientes de Regresión Bi de las covariables que resultaron significativas
+
+Se obtiene el hiperplano de la regresión muestral para hacer predicciones sobre  la variable dependiente
+para valores concretos de las variables independientes significativas Xi
+
+Modelo de regresión
+
+Y= B0 + B1X1 ... + BkXk + e
+
+HIPÓTESIS a contrastar:
+H0: B1 = ... = Bk = 0 Ninguna de las variables dependietes Xi tienen valor a la hora de 
+                    explicar a la variable dependiente Y"
+
+
+#             REGRESIÓN LINEAL MÚLTIPLE EN R
+
+
+
+autos<-c(69,51,53,46,67,82,19,66,66)
+
+periodico<-c(386,256,290,203,447,329,112,578,620)
+
+radio<-c(2412,10691,11680,12558,2462,2605,16203,2003,1823)
+
+#Para el gráfico en 3d usando plot3d
+library(rgl)
+plot3d(radio, autos, periodico)
+
+#usando scatterplot3d (orden: x,z,y)
+library(scatterplot3d)
+scatterplot3d(radio, autos, periodico, highlight.3d = TRUE, col.axis = "gray",col.grid = "gray",pch = 20)
+
+
+#A continuación se calcula el hiperplano con la función lm de radio y periodico sobre autos
+
+hiperplano<-lm(autos~radio+periodico)
+
+hiperplano
+
+#para obtener la tabla ANOVA
+
+summary(hiperplano)
+
+#radio       -0.003877   0.001002  -3.867  0.00829 **
+#El radio es el único valor significativo por lo que desechamos al periódico porque no aporta 
+#mucho a la variable dependiete
+
+
+
+#Ahora se calcula el lm usando solo el radio
+
+regresion<- lm(autos~radio)
+
+summary(regresion)
+
+
+"Nuestro modelo de regresión será:
+autos= 77.47 - 0.00285 radio
+
+p-value: 0.0008842 es significativo nuestro modelo porque < 0.05
+
+El p value es más bajo en radio por lo que es más significativo que con la regresión multiple
+que añade al periodico"
+
+
+
+
+
+
+
+#           9.6.1 SELECCIÓN SECUENCIAL DE VARIABLES POR PASOS
+
+"Utilizado por investigadores la selección secuencial de variables por pasos hacia adelante, atrás o ambos
+métodos. Se usa library (MASS)"
+
+library(MASS)
+
+"Both si se desean ambos métodos, forward hacia adelante y backward hacia atrás"
+
+porpasos <- stepAIC(hiperplano,direction = "both")
+
+"Se elige en base a los valores AIC. El más bajo es la regresión que se escoge:
+Step:  AIC=40.04
+autos ~ radio"
+
+
+
+"Para concluir se realiza el anova del modelo"
+
+
+porpasos$anova
+
