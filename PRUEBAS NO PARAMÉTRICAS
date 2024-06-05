@@ -1,0 +1,206 @@
+"Las pruebas no parámetricas se usan cuando no es total el control de las variables o variables extrañas
+entran en la investigación
+
+
+  Las pruebas no paramétricas se caracterizan por incumplir con una o las tres características de las 
+  pruebas paramétricas
+    Son:
+          1. Permiten contrastar hipótesis referidas a algún parámetro
+          2. Exigen el cumplimiento de determinados supuestos sobre las poblaciones originales de las que
+            se extraen los datos (NORMALIDAD Y HOMOCEDASTICIDAD (La varianza de los errores es constante))
+          3. Analizan datos obtenidos con una escala de medida de intervalo o razón
+
+    Cuando alguna de estas condiciones no se cumple se usan las pruebas no paramétricas"
+      
+
+library(extrafont)
+
+#       3.1.- WILCOXON
+
+#   Estadístico T+= V = núm   
+#   si P-value > 0.05 se acepta la hipótesis nula
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+"Queremos saber si debemos premiar a los trabajadores que tengan 2.5 ventas diarias
+  2.5 significaría nuestro nivel medio poblacional, es decir, QUEREMOS PREMIAR A ALOS QUE ESTÁN
+  POR ENCIMA DEL PROMEDIO, NO A LOS QUE ESTÁN EN LAS COLAS NI PARA BIEN NI PARA MAL"
+
+#   si P-value > 0.05 se acepta la hipótesis nula
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+" h0: M=2.5 -> se debe aceptar una venta diaria de 2.5 y premiar a estos trabajadores
+  Hi: M≠2.5 -> NO se debe aceptar una venta diaria de 2.5 y NO SE DEBE premiar a estos trabajadores"
+
+
+#   mvd: Media de ventas diarias por empleado de una base de datos anual
+mvd<-c(2.35,3.15,2.60,3.02,1.95,2.05,2.84,2.65,2.99,3.16,3.35,1.89,2.03,2.89,3.20,3.33,3.02,2.30,2.15,2.56)
+
+summary(mvd)
+
+# WILCOXON TEST
+
+wilcox.test(mvd,mu=2.5,exact =F,correct = F)
+
+# Se acepta la hipótesis nula en la que podemos afirmar con un 95% de confianza que nuestra media es
+#  igual a 2.5 ventas diarías
+
+
+# Lo que te dice el Wilcoxon test es, si, tu media es 2.5 o no, tu media no es de 2.5 osea que valida que
+# tu suposición (hipótesis) del número que crees que es tu media se correcto o no y dependiendo del 
+# p-value se acepta o no
+
+#Nada que summary no haga
+
+summary(mvd)
+
+
+# Sí se aplica la corrección por continuidad (correct = T):
+
+
+wilcox.test(mvd,mu=2.5,exact =F,correct = T)
+
+#Se acepta la hipótesis nula
+
+
+#       3.2.- TEST DE WILCOXON MANN WHITNEY
+
+# U = W = núm   P-Value
+
+"   H0: Mx = My
+    Hi: Mx ≠ My"
+#   si P-value > 0.05 se acepta la hipótesis nula
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+
+mvdhombres<-c(2.35,3.15,2.60,3.02,1.95,2.05,2.84,2.65,2.99,3.16,
+              3.35,1.89,2.03,2.89,3.20,3.33,3.02,2.30,2.15,2.56)
+mvdmujeres<-c(2.50,3.50,3.32,4.01,3.80,2.84,2.99,3.51,3.00,3.55,
+              2.50,2.01,1.15,2.35,3.01,2.15,2.32,2.45,3.00,2.52)
+
+mvd_df<-data.frame(mvdhombres,mvdmujeres)
+View(mvd_df)
+"Planteamiento de Hipótesis
+H0= la media de ventas diarías hechas por hombres es igual a la media de ventas diarias hechas por mujeres
+Hi= la media de ventas diarías hechas por hombres no es igual a la media de ventas diarias 
+hechas por mujeres"
+
+wilcox.test(mvd_df$mvdhombres, mvd_df$mvdmujeres, exact = F, correct = F)
+#                                   exact = F indica el p value aproxx para muestras grandes
+
+#p-value = 0.465 > 0.05 se acepta la hipótesis nula
+
+
+# Sí se aplica la corrección por continuidad (correct = T) se obtiene el mismo resultado:
+
+wilcox.test(mvd_df$mvdhombres, mvd_df$mvdmujeres, exact = F, correct = T)
+
+
+
+
+#       3.3.- TEST DE KOLMOGOROV-SMIRNOV DE BONDAD DE AJUSTE
+
+
+"Se utiliza para el contraste de la igualdad de dos poblaciones
+    H0: F(x) = G(x) <- nuestras poblaciones son iguales con una distribución normal
+    Hi: F(x) ≠ G(x) <- nuestras poblaciones no son iguales no tienen distribución normal"
+#   si P-value > 0.05 se acepta la hipótesis nula
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+
+"Queremos saber si tenemos una distribución normal con una media de 73 puntos de calificación y
+desviación de 10 puntos (que la mayoría de los datos se concentren entre 63 y 83)"
+
+"   H0: = Nuestros datos siguen una dnorm con media = 73 y desviación estándar de 10pts
+    H1: = Nuestros datos NO siguen una dnorm con media = 73 y desviación estándar de 10pts"
+
+#ccam: calificacion del cliente al empleado
+ccam<-c(52,52,63,63,63,64,64,68,68,68,68,70,70,70,70,70,71,71,71,71,71,73,73,73,73,
+        73,73,73,73,75,75,75,75,75,75,75,80,80,80,80,82,82,82,84,84,87,87,89,89,95)
+calatencion<-data.frame(ccam)
+calatencion
+ks.test(calatencion$ccam,"pnorm",73,10)
+
+#  p-value = 0.1168 > 0.05  se acepta H0
+
+
+
+
+#       3.3.- TEST DE KRUSTAL WALLIS
+
+"Cuando no se cumplan las supocisiones de normalidad y homocedasticidad no se puede optar por
+análisis anova por lo que se usan pruebas no paramétricas"
+
+
+"Se utiliza para el contraste de la igualdad
+    H0:  <- nuestras poblaciones son iguales
+    Hi:  <- nuestras poblaciones no son iguales"
+#   si P-value > 0.05 se acepta la hipótesis nula
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+
+"Queremos saber si existe diferencia significativa de las ganancias mensuales de 5 meses en las 3 oficinas
+    H0: existe igualdad de ganancias en las tres oficinas
+    H1: no existe igualdad de ganancias en las tres oficinas"
+
+oficina<-c(120000,110000,90000,100000,110000,80000,70000,130000,
+           120000,110000,90000,140000,130000,100000,120000)
+
+#para crear la tabla con 3 filas y con 5 datos cada fila
+
+ganancias<-factor(rep(LETTERS[1:3],c(5,5,5)))
+
+ganofic<-data.frame(oficina,ganancias)
+
+kruskal.test(ganofic$oficina~ganofic$ganancias)
+
+# p-value = 0.575 > 0.05   Se acepta H0
+
+
+
+#       3.3.- TEST DE KRUSTAL WALLIS
+
+"Es una alternativa no paramétrica del ANOVA o al t-student"
+
+
+"Se utiliza para el contraste de la igualdad
+    H0:  <- nuestras poblaciones son iguales
+    Hi:  <- nuestras poblaciones no son iguales"
+#   si P-value > 0.05 se acepta la hipótesis nula
+#   Sí P-value < 0.05 se acepta la hipótesis alternativa
+
+
+"Se tiene el matríz de datos de las ventas de  3 años de un producto  
+con 3 campañas de publicidad diferentes por bimestres
+    H0: existe igualdad de ventas en los tres años
+    H1: no existe igualdad de ventas en los tres años"
+
+
+matriz1<-matrix(c(150,180,200,160,190,250,140,170,220,160,150,230,180,140,240,170,160,200),ncol=6)
+matriz1
+
+rownames(matriz1)<-c("2012","2013","2014")
+colnames(matriz1)<-c("Ene-Feb","Mar-Abr","May-Jun","Jul-Ago","Sep-Oct",
+                     "Nov-Dic")
+matriz1
+VentasAnuales<-data.frame(matriz1)
+VentasAnuales
+chisq.test(VentasAnuales)
+
+# p-value = 0.0365 < 0.05  Se acepta H1 : Hay diferencias en las ventas entre los 3 años
+
+chisq.test(VentasAnuales$May.Jun)
+
+
+# Para estudiar si se necesita la corrección de Yates (se hace calculando las frecuencias esperadas)
+chisq.test(VentasAnuales)$expected
+VentasAnuales
+
+#Son muy grandes para necesitar la corrección de Yates y el P-Value es correcto
+
+#En caso de necesitarla solo se agrega correct = T
+
+chisq.test(VentasAnuales, correct = T)
+
+#nos da el mismo P-Values
+
+
